@@ -1,0 +1,84 @@
+<%
+const numberOfTunnels = Object.keys(tunnel).length;
+const payloadMatches = locals.responseData
+    && locals.responseData["left"]
+    && locals.responseData["right"]
+    && JSON.stringify(locals.responseData["left"]) == JSON.stringify(locals.responseData["right"]);
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head -->
+    <%- include('partials/head', {}); %>
+    <!-- /.Head -->
+</head>
+
+<body>
+    <!--Navbar -->
+    <%- include('partials/navbar', {nav_active: 1, form: true}); %>
+    <!--/.Navbar -->
+
+    <section class="results">
+        <row class="panels">            
+            <!-- Left Panel -->
+            <div class="info-container col-lg-6 col-sm-12 left">
+                <div class="info" style="flex:1 0 100%;">
+                    <% if (numberOfTunnels > 0) { %>
+                        <span> <%= tunnel.left.host %> ( Port:<%= tunnel.left.port %> )</span>
+                    <% } else { %>
+                        <span>---------</span>
+                    <% } %>
+                </div>
+
+                <%# Display results %>
+                <% if (locals.responseData && locals.responseData["left"]) { %>
+                    <% if (!Array.isArray(locals.responseData["left"]) && typeof locals.responseData["left"] === "object") { %>
+                        <pre><%- syntaxHighlight(JSON.stringify(locals.responseData["left"], undefined, 4)); %></pre>
+                    <% } else if (Array.isArray(locals.responseData["left"]) && locals.responseData["left"][0] === false) { %>
+                        <pre>Empty</pre>
+                    <% } else { %>
+                        <% console.log("Unhandled data type: %s", typeof locals.responseData["left"]); %>
+                        <p style="color: #3512a0; margin-top: 15px;">Unknown Memcache(d) value! Syntax highlighting not possible!</p>
+                        <pre><%- locals.responseData["left"]; %></pre>
+                    <% } %>
+                <% } %>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="info-container col-lg-6 col-sm-12 right">
+                <div class="info" style="flex:1 0 100%;">
+                    <% if (numberOfTunnels > 1) { %>
+                        <% if (payloadMatches) { %>
+                            <span class="comparator match"> Content matches</span> 
+                        <% } else { %>
+                            <span class="comparator not-match"> Content doesn't match</span> 
+                        <% } %>
+                        <span> <%= tunnel.right.host %> ( Port:<%= tunnel.right.port %> )</span>                        
+                        <a href="/close?panel=right&page=index" title="Close Tunnel" class="closeLink">
+                            <button type="button" id="rightClose" class="close" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </a>
+                    <% } else { %>
+                        <span>---------</span>
+                    <% } %>
+                </div>
+
+                <%# Display results %>
+                <% if (locals.responseData && locals.responseData["right"]) { %>
+                    <% if (!Array.isArray(locals.responseData["right"]) && typeof locals.responseData["right"] === "object") { %>
+                        <pre><%- syntaxHighlight(JSON.stringify(locals.responseData["right"], undefined, 4)); %></pre>
+                    <% } else if (Array.isArray(locals.responseData["right"]) && locals.responseData["right"][0] === false) { %>
+                        <pre>Empty</pre>
+                    <% } else { %>
+                         <% console.log("Unhandled data type: %s", typeof locals.responseData["right"]); %>
+                         <p style="color: #3512a0; margin-top: 15px;">Unknown Memcache(d) value! Syntax highlighting not possible!</p>
+                         <pre><%- locals.responseData["right"]; %></pre>
+                    <% } %>
+                <% } %>
+            </div>
+        </row>
+    </section>
+</body>
+</html>

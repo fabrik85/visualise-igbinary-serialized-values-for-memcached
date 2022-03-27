@@ -1,0 +1,184 @@
+<%
+const numberOfTunnels = Object.keys(tunnel).length;
+const envNames = Object.keys(environment);
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head -->
+    <%- include('partials/head', {}); %>
+    <!-- /.Head -->
+
+    <script type="text/javascript">
+      function getNodes(value, elementID) {
+        // use <textarea> for decoding HTML characters ;)
+        const textarea = document.createElement("textarea");
+        textarea.innerHTML = '<%= JSON.stringify(environment) %>';
+        const environment = JSON.parse(textarea.value);
+        const leftHost = '<% if (numberOfTunnels) { %><%= tunnel.left.host %><% } %>';
+        const rightHost = '<% if (numberOfTunnels > 1) { %><%= tunnel.right.host %><% } %>';
+        const host = (elementID === "rightNode" ? rightHost : leftHost);
+        const buttonID = (elementID === "rightNode" ? "rightButton" : "leftButton");
+
+        if (value.length === 0) {
+          document.getElementById(elementID).innerHTML = "<option value=\"\"></option>";
+        } else {
+          let nodeOptions = "";
+
+          for (let property in environment[value]) {
+            const selected = (host === environment[value][property].host ? "selected" : "");
+            nodeOptions += `<option value="${property}" ${selected}>${property}</option>`;
+          }
+
+          // Enable node selection once environment is selected.
+          if (nodeOptions) {
+            document.getElementById(elementID).disabled = false;
+          }
+          document.getElementById(elementID).innerHTML = nodeOptions;
+          document.getElementById(buttonID).disabled = false;
+        }
+      }
+
+      const missingUser = <%= missingUser %>;
+      (missingUser ? alert("SSH tunnel user not defined in src/setting.json!") : null);
+    </script>
+</head>
+
+<body>
+    <!--Navbar -->
+    <%- include('partials/navbar', { nav_active: 2, form: false }); %>
+    <!--/.Navbar -->
+
+    <div class="row">
+
+        <!-- Left panel -->
+        <div class="info-container col-lg-6 col-6 left">
+            <div class="info" style="flex:1 0 100%;">
+                <% if (numberOfTunnels > 0) { %>
+                    <span> <%= tunnel.left.host %> ( Port:<%= tunnel.left.port %> )</span>
+                    <% if (numberOfTunnels === 1) { %>
+                    <a href="/close?panel=left" title="Close Tunnel" class="closeLink">
+                        <button type="button" id="leftClose" class="close" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </a>
+                    <% } %>
+                <% } else { %>
+                    <span>---------</span>
+                <% } %>
+            </div>
+            <form name="leftConnect" class="px-4 py-3" action="/connect" method="POST">
+                <div class="form-group">
+                    <!-- Environment selection (e.g. live/stage/dev) -->
+                    <label for="leftDropdownEnvironment">Environment</label>
+                    <select name="environment" id="leftEnv" class="browser-default custom-select"
+                            onChange="getNodes(this.value, 'leftNode');">
+                        <% if (!numberOfTunnels) { %>
+                            <option value="" disabled selected>Select an environment to use (e.g. staging)</option>
+                        <% } %>
+
+                        <%
+                        for (let i = 0; i < envNames.length; i++) {
+                            let selectedFlag = "";
+                            // Try to find the selected node in this environment.
+                            for (let node in environment[envNames[i]]) {
+                              if (!numberOfTunnels) {
+                                break;
+                              } else if (tunnel.left.host === environment[envNames[i]][node].host) {
+                                selectedFlag = "selected";
+                                break;
+                              }
+                            }
+                            %>
+                            <option value="<%= envNames[i]; %>" <%= selectedFlag; %>><%= envNames[i].charAt(0).toUpperCase() + envNames[i].slice(1); %></option>
+                            <%
+                        }
+                        %>
+                    </select>
+
+                    <!-- Node selection (e.g. stage-server-1/stage-server-2/...) -->
+                    <label for="leftDropdownNode">Node</label>
+                    <select name="node" id="leftNode" class="browser-default custom-select" disabled>
+                        <option value="" disabled selected>Select</option>
+                    </select>
+                </div>
+                <input type="hidden" name="panel" value="left">
+                <button type="submit" id="leftButton" class="btn btn-primary"
+                        onClick="this.disabled=true; this.innerText='Sending…'; this.form.submit();"
+                        <% if (!numberOfTunnels) { %>disabled<% } %>>Connect</button>
+            </form>
+        </div>
+        <%# Environtment already selected => trigger event listener manually %>
+        <% if (numberOfTunnels) { %>
+            <script type="text/javascript">
+              let element = document.getElementById("leftEnv");
+              const event = new Event('change');
+              element.dispatchEvent(event);
+            </script>
+        <% } %>
+
+        <!-- Right panel -->
+        <div class="info-container col-lg-6 col-6 right">
+            <div class="info" style="flex:1 0 100%;">
+                <% if (numberOfTunnels > 1) { %>
+                    <span> <%= tunnel.right.host %> ( Port:<%= tunnel.right.port %> )</span>
+                    <a href="/close?panel=right" title="Close Tunnel" class="closeLink">
+                        <button type="button" id="rightClose" class="close" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </a>
+                <% } else { %>
+                    <span>---------</span>
+                <% } %>
+            </div>
+            <form name="rightConnect" class="px-4 py-3" action="/connect" method="POST">
+                <div class="form-group">
+                    <!-- Dynamic selection live/stage/dev -->
+                    <label for="rightDropdownEnvironment">Environment</label>
+                    <select name="environment" id="rightEnv" class="browser-default custom-select"
+                            onChange="getNodes(this.value, 'rightNode');" <% if (!numberOfTunnels) { %>disabled<% } %>>
+                        <% if (numberOfTunnels < 2) { %>
+                        <option value="" disabled selected>Select an environment to use (e.g. staging)</option>
+                        <% } %>
+
+                        <%
+                        for (let i = 0; i < envNames.length; i++) {
+                            let selectedFlag = "";
+                            // Try to find the selected node in this environment.
+                            for (let node in environment[envNames[i]]) {
+                                if (numberOfTunnels < 2) {
+                                    break;
+                                } else if (tunnel.right.host === environment[envNames[i]][node].host) {
+                                    selectedFlag = "selected";
+                                    break;
+                                }
+                            }
+                        %>
+                        <option value="<%= envNames[i]; %>" <%= selectedFlag; %>><%= envNames[i].charAt(0).toUpperCase() + envNames[i].slice(1); %></option>
+                        <%
+                        }
+                        %>
+                    </select>
+                    <label for="dropdownNode">Node</label>
+                    <select name="node" id="rightNode" class="browser-default custom-select" disabled>
+                        <option value="" disabled selected>Select</option>
+                    </select>
+                </div>
+                <input type="hidden" name="panel" value="right">
+                <button type="submit" id="rightButton" class="btn btn-primary"
+                        onClick="this.disabled=true; this.innerText='Sending…'; this.form.submit();"
+                        disabled>Connect</button>
+            </form>
+        </div>
+        <%# Environtment already selected => trigger event listener manually %>
+        <% if (numberOfTunnels > 1) { %>
+            <script type="text/javascript">
+              element = document.getElementById("rightEnv");
+              element.dispatchEvent(event);
+            </script>
+        <% } %>
+    </div>
+
+</body>
+</html>

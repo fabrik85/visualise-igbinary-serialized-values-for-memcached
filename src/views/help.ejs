@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head -->
+    <%- include('partials/head', {}); %>
+    <!-- /.Head -->
+</head>
+
+<% const numberOfTunnels = Object.keys(tunnel).length; %>
+
+<body>
+    <!--Navbar -->
+    <%- include('partials/navbar', {nav_active: 3, form: false}); %>
+    <!--/.Navbar -->
+
+    <section class="content">
+        <div class="container">
+          <div class="card">
+              <div class="card-body">
+                  <code style="white-space: normal;">
+                      <p class="lead">All keys except session keys structured as: [MODULE]_[INDEX]</p>
+                      Example:
+                      <ul style="list-style-type: disclosure-closed; list-style-position: inside;">
+                          <li>tools_configuration</li>
+                          <li>resource_index</li>
+                          <li>brands_index</li>
+                          <li>product_index</li>
+                          <li>product_[SKU]</li>
+                          <li>memc.sess.[PHPSESSID]</li>
+                      </ul>
+
+                      <br>
+                      <pre>
+[MODULE]=tools
+[INDEX]=configuration
+
+The tool will prepend NAMESPACE (e.g. application-namespace-in-case-you-have-it)
+to the key before sending the query to the server.
+So the final key will looks like this:
+[NAMESPACE][MODULE]_[INDEX] => application-namespace-in-case-you-have-ittools_configuration
+
+NAMESPACE stored in "/src/settings.json" file under "ns" property.
+Example:
+env.staging.stage-server-1.ns
+                      </pre>
+                  </code>
+              </div>
+          </div>
+          <br />
+        </div>
+    </section>
+</body>
+</html>

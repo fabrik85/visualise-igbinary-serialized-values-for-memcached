@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-lg navbar-mainbg">
+    <a class="navbar-brand navbar-logo" href="#">Visualise igbinary serialized values for Memcache/Memcached</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars text-white"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <% if (form) { %>
+            <form class="form-inline" action="/">
+                <input type="text" class="form-control" name="mckey" placeholder="tools-ext_configuration"/>
+                <input type="submit" class="btn btn-primary" value="Read"/>
+            </form>
+        <% } %>
+        <ul class="navbar-nav ml-auto">
+            <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
+            <li class="nav-item <% if (nav_active && nav_active === 1) { %>active<% } %>"> <!-- <li class="nav-item active"> -->
+                <a class="nav-link" href="/"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+            </li>
+            <li class="nav-item <% if (nav_active && nav_active === 2) { %>active<% } %>">
+                <a class="nav-link" href="/connect"><i class="far fa-address-book"></i>Connections</a>
+            </li>
+            <li class="nav-item <% if (nav_active && nav_active === 3) { %>active<% } %>">
+                <a class="nav-link" href="/help"><i class="far fa-copy"></i>Help</a>
+            </li>
+        </ul>
+    </div>
+</nav>

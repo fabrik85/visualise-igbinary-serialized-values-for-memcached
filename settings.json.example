@@ -1,0 +1,41 @@
+{
+  "sshUser": "root",
+  "apiPort": 3008,
+  "localPort": {
+    "left": 3001,
+    "right": 3002
+  },
+  "env": {
+    "dev": {
+      "local": {
+        "host": "local-memcached-host-address",
+        "port": 11211,
+        "ns": "application-namespace-in-case-you-have-it"
+      }
+    },
+    "staging": {
+      "stage-server-1": {
+        "host": "staging-memcached-host-address",
+        "port": 11211,
+        "ns": "application-namespace-in-case-you-have-it"
+      },
+      "stage-server-2": {
+        "host": "staging-memcached-host-address",
+        "port": 11211,
+        "ns": ""
+      }
+    },
+    "live": {
+      "production-server-1": {
+        "host": "production-memcached-host-address",
+        "port": 11211,
+        "ns": "application-namespace-in-case-you-have-it"
+      },
+      "production-server-n": {
+        "host": "production-memcached-host-address",
+        "port": 11211,
+        "ns": ""
+      }
+    }
+  }
+}

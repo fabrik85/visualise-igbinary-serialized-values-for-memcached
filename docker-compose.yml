@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  mce-node-php:
+    container_name: mce-node-php
+    hostname: mce-node-php
+    build:
+      context: .
+      dockerfile: _infra/build/Dockerfile
+    # Make it possible to edit files during local development (override)
+    volumes:
+      - ./src:/data
+    networks:
+      - mce
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=local
+      - PORT=3000
+    command: ["node", "app.js"]
+
+networks:
+  mce:
